@@ -35,3 +35,15 @@ void setup() {
   muestras = new float[TAMANO_BUFFER];
 }
 
+
+void mostrar_resultados(float frecuencia, float amplitud, String forma) {
+  lcd.clear();
+  lcd.print("F:");
+  lcd.print();
+  lcd.print("Hz A:");
+  lcd.print();
+  lcd.print("V");
+  lcd.setCursor(0, 1);
+  lcd.print("Forma: ");
+  lcd.print();
+}
