@@ -1,21 +1,21 @@
 
 #include <Adafruit_LiquidCrystal.h>
 
-// Definición de pines
+//definición de pines
 const int PIN_SENAL = A0;
 const int PIN_PULSADOR_INICIO = 2;
 const int PIN_PULSADOR_ANALISIS = 3;
 
-// Configuración del LCD
+//configuración del LCD
 Adafruit_LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-// Variables globales
+//variables globales
 const int TAMANO_BUFFER = 1000;
 float* muestras = nullptr;
 int indice_muestra = 0;
 bool adquisicion_activa = false;
 
-// Prototipos de funciones
+//prototipos de funciones
 void iniciar_adquisicion();
 void detener_adquisicion();
 void analizar_senal();
@@ -31,11 +31,66 @@ void setup() {
   lcd.begin(16, 2);
   lcd.print("Listo para iniciar");
   
-  // Asignación dinámica de memoria para el buffer
+  //asignación dinámica de memoria para el buffer
   muestras = new float[TAMANO_BUFFER];
 }
 
+//iniciar y detener adquisicion
+//
+void loop() {
+  if (digitalRead(PIN_PULSADOR_INICIO) == LOW && !adquisicion_activa) {
+    iniciar_adquisicion();
+  }
 
+  if (digitalRead(PIN_PULSADOR_ANALISIS) == LOW && adquisicion_activa) {
+    detener_adquisicion();
+    analizar_senal();
+    delay(5000);  // mostrar resultados por 5 segundos
+    iniciar_adquisicion();
+  }
+
+  if (adquisicion_activa) {
+    if (indice_muestra < TAMANO_BUFFER) {
+      muestras[indice_muestra] = analogRead(PIN_SENAL) * (5.0 / 1023.0);  // convertir a voltios
+      indice_muestra++;
+    } else {
+      indice_muestra = 0;  // reiniciar buffer
+    }
+  }
+
+
+
+
+void iniciar_adquisicion() {
+  adquisicion_activa = true;
+  indice_muestra = 0;
+  lcd.clear();
+  lcd.print("Adquiriendo...");
+}
+
+
+
+
+void detener_adquisicion(){
+
+        adquisicion_activa = false;
+
+}
+
+
+
+//analizar señal
+//
+void analizar_senal() {
+  float frecuencia = calcular_frecuencia();
+  float amplitud = calcular_amplitud();
+  String forma = identificar_forma_onda();
+  
+  mostrar_resultados(frecuencia, amplitud, forma);
+}
+
+//mostrar resultados
+//
 void mostrar_resultados(float frecuencia, float amplitud, String forma) {
   lcd.clear();
   lcd.print("F:");
